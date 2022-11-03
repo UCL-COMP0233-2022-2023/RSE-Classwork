@@ -1,0 +1,20 @@
+name: Update issue
+on:
+  issues:
+    types:
+      - created
+      - opened
+
+jobs:
+  reference_issues:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: basic Shell
+        run: |
+           gh issue view ${{ github.event.issue.html_url }} --json body -t '{{.body}}' >> text_body
+           sed -i -e "s/{{this_issue}}/${{ github.event.issue.number }}/g" text_body
+           gh issue edit ${{ github.event.issue.html_url }} --body-file text_body
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
