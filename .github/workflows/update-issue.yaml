@@ -1,4 +1,6 @@
 name: Update issue
+# Note that syntax to refer to this issue is: {{ this_issue }} and for a
+# previous one: {{ (this_issue | int ) - 1 }}
 on:
   issues:
     types:
@@ -11,10 +13,16 @@ jobs:
     permissions:
       issues: write
     steps:
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          pip install jinja-cli
       - name: basic Shell
         run: |
            gh issue view ${{ github.event.issue.html_url }} --json body -t '{{.body}}' >> text_body
-           sed -i -e "s/{{this_issue}}/${{ github.event.issue.number }}/g" text_body
-           gh issue edit ${{ github.event.issue.html_url }} --body-file text_body
+           jinja -D "this_issue" "${{ github.event.issue.number }}" -o text_body_out text_body
+           gh issue edit ${{ github.event.issue.html_url }} --body-file text_body_out
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
