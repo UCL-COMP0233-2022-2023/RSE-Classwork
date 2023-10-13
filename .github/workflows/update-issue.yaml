@@ -22,7 +22,7 @@ jobs:
       - name: basic Shell
         run: |
            gh issue view ${{ github.event.issue.html_url }} --json body -t '{{.body}}' >> text_body
-           jinja -D "this_issue" "${{ github.event.issue.number }}" -o text_body_out text_body
+           jinja -D "this_issue" "${{ github.event.issue.number }}" -D "this_org" "$(gh repo view --json owner -t '{{.owner.login}}')" -o text_body_out text_body
            gh issue edit ${{ github.event.issue.html_url }} --body-file text_body_out
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
